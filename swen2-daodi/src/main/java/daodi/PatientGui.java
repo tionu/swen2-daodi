@@ -15,7 +15,7 @@ import javax.swing.JTextField;
 public class PatientGui implements ActionListener {
 
 	private JButton readButton;
-	private JButton addButton;
+	private JButton createButton;
 	private JButton updateButton;
 	private JButton deleteButton;
 	private JTextField idTextField;
@@ -35,15 +35,15 @@ public class PatientGui implements ActionListener {
 		vornameTextField = new JTextField();
 		gebDatTextField = new JTextField();
 		readButton = new JButton("Laden");
-		addButton = new JButton("HinzufÃ¼gen");
+		createButton = new JButton("Hinzufügen");
 		updateButton = new JButton("Aktualisieren");
 		deleteButton = new JButton("Entfernen");
 		readButton.setActionCommand("READ");
-		addButton.setActionCommand("ADD");
+		createButton.setActionCommand("ADD");
 		updateButton.setActionCommand("UPDATE");
 		deleteButton.setActionCommand("DELETE");
 		readButton.addActionListener(this);
-		addButton.addActionListener(this);
+		createButton.addActionListener(this);
 		updateButton.addActionListener(this);
 		deleteButton.addActionListener(this);
 
@@ -56,7 +56,7 @@ public class PatientGui implements ActionListener {
 		dataPanel.add(gebDatLabel);
 		dataPanel.add(gebDatTextField);
 		controlPanel.add(readButton);
-		controlPanel.add(addButton);
+		controlPanel.add(createButton);
 		controlPanel.add(updateButton);
 		controlPanel.add(deleteButton);
 
