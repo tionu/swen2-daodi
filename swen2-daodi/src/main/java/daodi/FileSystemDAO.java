@@ -7,7 +7,8 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.file.FileAlreadyExistsException;
+import java.io.PrintWriter;
+import java.io.RandomAccessFile;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
@@ -31,6 +32,7 @@ public class FileSystemDAO implements Persistence {
 			Files.createFile(Paths.get(storageFile));
 		} catch (IOException ignored) {
 		}
+		assureFileEndsWithNewLine(storageFile);
 	}
 
 	public void createPatient(Patient patient) {
@@ -117,6 +119,27 @@ public class FileSystemDAO implements Persistence {
 	private boolean existsId(int patientId) {
 		Patient presentPatient = readPatient(patientId);
 		return presentPatient.getNachname() != null;
+	}
+
+	private void assureFileEndsWithNewLine(String storageFile) {
+		if (!fileEndsWithNewLine(storageFile)) {
+			try (PrintWriter output = new PrintWriter(new FileWriter(storageFile, true))) {
+				output.print(System.getProperty("line.separator"));
+			} catch (Exception ignored) {
+			}
+		}
+	}
+
+	private boolean fileEndsWithNewLine(String storageFile) {
+		try (RandomAccessFile fileHandler = new RandomAccessFile(storageFile, "r");) {
+			fileHandler.seek(fileHandler.length() - 1);
+			int readByte = fileHandler.readByte();
+			if (readByte == 10) {
+				return true;
+			}
+		} catch (IOException ignored) {
+		}
+		return false;
 	}
 
 }

@@ -30,7 +30,6 @@ public class ApplicationCore {
 		// inject storage provider and run gui
 		PatientGui gui = new PatientGui(storageProvider);
 		gui.show();
-
 	}
 
 }
