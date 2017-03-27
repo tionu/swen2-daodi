@@ -1,4 +1,4 @@
-package swen2;
+package daodi;
 
 import static org.junit.Assert.assertEquals;
 
