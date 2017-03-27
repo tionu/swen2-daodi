@@ -1,6 +1,7 @@
 package daodi;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -11,12 +12,9 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import daodi.Patient;
-import daodi.SQLiteDAO;
-
 public class SQLiteDAOTest {
 
-	private SQLiteDAO persist = new SQLiteDAO("./src/main/java/daodi/PatientDB.db");
+	private SQLiteDAO persist = new SQLiteDAO("./src/test/java/daodi/storage/PatientDB.db");
 
 	private int id;
 	private String vorname;
@@ -39,16 +37,7 @@ public class SQLiteDAOTest {
 	}
 
 	@Test
-	public void testCreatePatient() {
-		Patient patientCreate = new Patient(id);
-		patientCreate.setVorname(vorname);
-		patientCreate.setNachname(nachname);
-		patientCreate.setGebDat(geburtstag);
-		persist.createPatient(patientCreate);
-	}
-
-	@Test
-	public void testReadPatient() {
+	public void testCreateAndReadPatient() {
 		createDummy();
 		Patient patientRead = persist.readPatient(id);
 		assertEquals(id, patientRead.getId());
@@ -76,6 +65,11 @@ public class SQLiteDAOTest {
 	public void testDeletePatient() {
 		createDummy();
 		persist.deletePatient(id);
+		Patient patientRead = persist.readPatient(id);
+		assertEquals(id, patientRead.getId());
+		assertNull(patientRead.getVorname());
+		assertNull(patientRead.getNachname());
+		assertNull(patientRead.getGebDat());
 	}
 
 	private void createDummy() {

@@ -41,7 +41,8 @@ public class SQLiteDAO implements Persistence {
 			statement.close();
 			System.out.println("patient created in db.");
 		} catch (SQLException e) {
-			System.err.println("error creating patient in db.");
+			String message = "error creating patient in db.";
+			System.err.println(message);
 			e.printStackTrace();
 		}
 	}
@@ -93,7 +94,7 @@ public class SQLiteDAO implements Persistence {
 			e.printStackTrace();
 		}
 	}
-	
+
 	public void purge() {
 		try {
 			dbConnection.createStatement().execute("DELETE FROM PaPatient");
