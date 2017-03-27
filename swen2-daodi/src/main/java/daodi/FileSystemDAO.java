@@ -7,6 +7,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
@@ -18,12 +19,18 @@ public class FileSystemDAO implements Persistence {
 
 	// date format used to store date-objects as strings in file.
 	private static final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
-	private static final String FIELD_SEPERATOR = "|";
+
+	// field separator used in storage file
+	private static final String FIELD_SEPARATOR = "|";
 
 	private String storageFile;
 
 	public FileSystemDAO(String storageFile) {
 		this.storageFile = storageFile;
+		try {
+			Files.createFile(Paths.get(storageFile));
+		} catch (IOException ignored) {
+		}
 	}
 
 	public void createPatient(Patient patient) {
@@ -32,8 +39,8 @@ public class FileSystemDAO implements Persistence {
 			return;
 		}
 
-		String textLineOut = patient.getId() + FIELD_SEPERATOR + patient.getNachname() + FIELD_SEPERATOR
-				+ patient.getVorname() + FIELD_SEPERATOR + DATE_FORMAT.format(patient.getGebDat())
+		String textLineOut = patient.getId() + FIELD_SEPARATOR + patient.getNachname() + FIELD_SEPARATOR
+				+ patient.getVorname() + FIELD_SEPARATOR + DATE_FORMAT.format(patient.getGebDat())
 				+ System.getProperty("line.separator");
 		try {
 			Files.write(Paths.get(storageFile), textLineOut.getBytes(), StandardOpenOption.APPEND);
@@ -48,7 +55,7 @@ public class FileSystemDAO implements Persistence {
 		String textLineIn;
 		try (BufferedReader fileReader = new BufferedReader(new FileReader(storageFile))) {
 			while ((textLineIn = fileReader.readLine()) != null) {
-				String[] fields = textLineIn.split("\\" + FIELD_SEPERATOR);
+				String[] fields = textLineIn.split("\\" + FIELD_SEPARATOR);
 				if (fields.length >= 4) {
 					if (fields[0].equals(String.valueOf(id))) {
 						patient.setNachname(fields[1]);
@@ -91,7 +98,7 @@ public class FileSystemDAO implements Persistence {
 		try (BufferedReader reader = new BufferedReader(new FileReader(inputFile));
 				BufferedWriter writer = new BufferedWriter(new FileWriter(tempFile))) {
 			while ((textLineIn = reader.readLine()) != null) {
-				String[] fields = textLineIn.split("\\" + FIELD_SEPERATOR);
+				String[] fields = textLineIn.split("\\" + FIELD_SEPARATOR);
 				if (fields.length >= 1) {
 					if (!fields[0].equals(String.valueOf(id))) {
 						writer.write(textLineIn + System.getProperty("line.separator"));
