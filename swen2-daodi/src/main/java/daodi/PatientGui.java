@@ -1,10 +1,15 @@
 package daodi;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -14,6 +19,12 @@ import javax.swing.JTextField;
 
 public class PatientGui implements ActionListener {
 
+	// date format
+	private static final String DATE_STRING = "dd.MM.yyyy";
+
+	private Persistence storageProvider;
+	private DateFormat dateFormat;
+
 	private JButton readButton;
 	private JButton createButton;
 	private JButton updateButton;
@@ -22,14 +33,25 @@ public class PatientGui implements ActionListener {
 	private JTextField nachnameTextField;
 	private JTextField vornameTextField;
 	private JTextField gebDatTextField;
+	private JLabel status;
+
+	public PatientGui(Persistence storageProvider) {
+		super();
+		this.storageProvider = storageProvider;
+		this.dateFormat = new SimpleDateFormat(DATE_STRING);
+		;
+	}
 
 	public void show() {
 		JPanel dataPanel = new JPanel(new GridLayout(4, 2));
 		JPanel controlPanel = new JPanel(new FlowLayout());
+		JPanel statusPanel = new JPanel(new FlowLayout());
 		JLabel idLabel = new JLabel("ID");
 		JLabel nachnameLabel = new JLabel("Nachname");
 		JLabel vornameLabel = new JLabel("Vorname");
 		JLabel gebDatLabel = new JLabel("Geburtsdatum");
+		status = new JLabel(" ");
+		status.setForeground(Color.RED);
 		idTextField = new JTextField();
 		nachnameTextField = new JTextField();
 		vornameTextField = new JTextField();
@@ -59,26 +81,142 @@ public class PatientGui implements ActionListener {
 		controlPanel.add(createButton);
 		controlPanel.add(updateButton);
 		controlPanel.add(deleteButton);
+		statusPanel.add(status);
 
 		JFrame frame = new JFrame("Patient");
 		frame.setLayout(new BorderLayout());
 		frame.add(dataPanel, BorderLayout.CENTER);
 		frame.add(controlPanel, BorderLayout.SOUTH);
+		frame.add(statusPanel, BorderLayout.NORTH);
 		frame.setSize(500, 250);
 		frame.setVisible(true);
 	}
 
 	public void actionPerformed(ActionEvent e) {
+		status.setText(" ");
 		if (e.getActionCommand().equals("READ")) {
-			// TODO Code ergÃ¤nzen, um Patient zu laden
+			if (idTextField.getText().length() == 0) {
+				status.setText("Bitte ID eingeben.");
+				return;
+			}
+
+			int patientID;
+			if (validateId(idTextField.getText())) {
+				patientID = Integer.parseInt(idTextField.getText());
+			} else {
+				status.setText("ID muss eine Zahl sein.");
+				return;
+			}
+
+			Patient patient = storageProvider.readPatient(patientID);
+			if (!(patient.getNachname() == null)) {
+				nachnameTextField.setText(patient.getNachname());
+				vornameTextField.setText(patient.getVorname());
+				gebDatTextField.setText(dateFormat.format(patient.getGebDat()));
+			} else {
+				status.setText("ID nicht gefunden.");
+			}
 		} else if (e.getActionCommand().equals("ADD")) {
-			// TODO Code ergÃ¤nzen, um Patient hinzuzufÃ¼gen
+			if (idTextField.getText().length() == 0 || nachnameTextField.getText().length() == 0
+					|| vornameTextField.getText().length() == 0 || gebDatTextField.getText().length() == 0) {
+				status.setText("Bitte alle Felder ausfüllen.");
+				return;
+			}
+
+			int patientID;
+			if (validateId(idTextField.getText())) {
+				patientID = Integer.parseInt(idTextField.getText());
+			} else {
+				status.setText("ID muss eine Zahl sein.");
+				return;
+			}
+
+			Date geburtsDatum;
+			try {
+				geburtsDatum = dateFormat.parse(gebDatTextField.getText());
+			} catch (ParseException e1) {
+				status.setText("Format für Geburtstdatum: " + DATE_STRING);
+				return;
+			}
+
+			Patient existingPatient = storageProvider.readPatient(patientID);
+			if (!(existingPatient.getNachname() == null)) {
+				status.setText("ID bereits vorhanden. Bitte 'Aktualisieren' benutzen.");
+				return;
+			}
+
+			Patient createPatient = new Patient(patientID);
+			createPatient.setNachname(nachnameTextField.getText());
+			createPatient.setVorname(vornameTextField.getText());
+			createPatient.setGebDat(geburtsDatum);
+			storageProvider.createPatient(createPatient);
 		} else if (e.getActionCommand().equals("UPDATE")) {
-			// TODO Code ergÃ¤nzen, um Patient zu aktualsieren
+			if (idTextField.getText().length() == 0 || nachnameTextField.getText().length() == 0
+					|| vornameTextField.getText().length() == 0 || gebDatTextField.getText().length() == 0) {
+				status.setText("Bitte alle Felder ausfüllen.");
+				return;
+			}
+
+			int patientID;
+			if (validateId(idTextField.getText())) {
+				patientID = Integer.parseInt(idTextField.getText());
+			} else {
+				status.setText("ID muss eine Zahl sein.");
+				return;
+			}
+
+			Date geburtsDatum;
+			try {
+				geburtsDatum = dateFormat.parse(gebDatTextField.getText());
+			} catch (ParseException e1) {
+				status.setText("Format für Geburtstdatum: " + DATE_STRING);
+				return;
+			}
+
+			Patient existingPatient = storageProvider.readPatient(patientID);
+			if ((existingPatient.getNachname() == null)) {
+				status.setText("ID nicht vorhanden. Bitte 'Hinzufügen' benutzen.");
+				return;
+			}
+
+			Patient createPatient = new Patient(patientID);
+			createPatient.setNachname(nachnameTextField.getText());
+			createPatient.setVorname(vornameTextField.getText());
+			createPatient.setGebDat(geburtsDatum);
+			storageProvider.updatePatient(createPatient);
+
 		} else if (e.getActionCommand().equals("DELETE")) {
-			// TODO Code ergÃ¤nzen, um Patient zu lÃ¶schen
+			if (idTextField.getText().length() == 0) {
+				status.setText("Bitte ID eingeben.");
+				return;
+			}
+
+			int patientID;
+			if (validateId(idTextField.getText())) {
+				patientID = Integer.parseInt(idTextField.getText());
+			} else {
+				status.setText("ID muss eine Zahl sein.");
+				return;
+			}
+
+			storageProvider.deletePatient(patientID);
+
+			idTextField.setText("");
+			nachnameTextField.setText("");
+			vornameTextField.setText("");
+			gebDatTextField.setText("");
+
 		}
 
+	}
+
+	private boolean validateId(String patientId) {
+		try {
+			Integer.parseInt(patientId);
+		} catch (NumberFormatException e1) {
+			return false;
+		}
+		return true;
 	}
 
 }
