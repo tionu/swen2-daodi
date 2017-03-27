@@ -16,6 +16,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import javax.swing.WindowConstants;
 
 public class PatientGui implements ActionListener {
 
@@ -89,6 +90,7 @@ public class PatientGui implements ActionListener {
 		frame.add(controlPanel, BorderLayout.SOUTH);
 		frame.add(statusPanel, BorderLayout.NORTH);
 		frame.setSize(500, 250);
+		frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		frame.setVisible(true);
 	}
 
